@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Для тебя ♥</title>
+<style>
+  :root{--pink:#ff4d8d;--glass:rgba(255,255,255,.07);--border:rgba(255,255,255,.15);--text:#f5eaf2;color-scheme:dark}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--text);background:#0a0510;overflow:hidden}
+  .bg{position:fixed;inset:0;z-index:0;background:radial-gradient(60vmax 60vmax at 15% 20%,rgba(255,77,141,.28),transparent 60%),radial-gradient(55vmax 55vmax at 85% 80%,rgba(120,60,255,.28),transparent 60%),radial-gradient(40vmax 40vmax at 60% 10%,rgba(255,140,80,.12),transparent 60%),#0a0510;animation:drift 14s ease-in-out infinite alternate}
+  @keyframes drift{from{filter:hue-rotate(0deg)}to{filter:hue-rotate(25deg)}}
+  #hearts{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden}
+  .fall{position:absolute;top:-10vh;animation:fall linear forwards;user-select:none;will-change:transform}
+  @keyframes fall{to{transform:translate3d(var(--dx),115vh,0) rotate(var(--rot));opacity:.9}}
+  .screen{position:fixed;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;padding:max(20px,env(safe-area-inset-top)) 20px max(20px,env(safe-area-inset-bottom));overflow-y:auto;overscroll-behavior:contain;transition:opacity .9s ease,transform .9s ease,visibility .9s}
+  .screen.hidden{opacity:0;visibility:hidden;pointer-events:none;transform:scale(.96)}
+  .card{width:100%;max-width:420px;padding:40px 28px;text-align:center;background:var(--glass);border:1px solid var(--border);border-radius:28px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 20px 60px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.12);margin:auto}
+  .lock{font-size:44px;margin-bottom:14px;animation:float 3s ease-in-out infinite}
+  @keyframes float{50%{transform:translateY(-8px)}}
+  h1{font-size:clamp(24px,6vw,30px);font-weight:700;margin-bottom:8px;letter-spacing:.3px}
+  .sub{font-size:15px;opacity:.7;margin-bottom:26px;line-height:1.5}
+  input{width:100%;padding:16px 18px;font-size:22px;text-align:center;letter-spacing:10px;color:var(--text);background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:16px;outline:none;transition:border-color .3s,box-shadow .3s}
+  input::placeholder{letter-spacing:4px;opacity:.35}
+  input:focus{border-color:var(--pink);box-shadow:0 0 0 4px rgba(255,77,141,.18)}
+  .btn{margin-top:16px;width:100%;padding:16px;font-size:17px;font-weight:600;color:#fff;cursor:pointer;border:none;border-radius:16px;background:linear-gradient(135deg,#ff4d8d,#c13cff);box-shadow:0 10px 30px rgba(255,77,141,.35);transition-property:scale,box-shadow;transition-duration:.15s,.3s;transition-timing-function:ease-out}
+  @media (hover:hover){.btn:hover{box-shadow:0 14px 38px rgba(255,77,141,.5)}}
+  .btn:not(:disabled):active{scale:.96}
+  .error{min-height:22px;margin-top:14px;font-size:14px;color:#ff9fbd;opacity:0;transition:opacity .4s}
+  .error.show{opacity:1}
+  .shake{animation:shake .5s}
+  @keyframes shake{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(5px)}30%,50%,70%{transform:translateX(-9px)}40%,60%{transform:translateX(9px)}}
+  .heart{font-size:68px;display:inline-block;cursor:pointer;animation:beat 1.3s ease-in-out infinite;filter:drop-shadow(0 0 18px rgba(255,77,141,.8))}
+  @keyframes beat{0%,100%{transform:scale(1)}15%{transform:scale(1.22)}30%{transform:scale(1)}45%{transform:scale(1.15)}}
+  .love h1{margin:14px 0 14px;background:linear-gradient(90deg,#ffb3d1,#ff4d8d,#d9a0ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+  #phrase{font-size:17px;line-height:1.65;min-height:112px;display:flex;align-items:center;justify-content:center;transition:opacity .35s,transform .35s}
+  #phrase.out{opacity:0;transform:translateY(8px)}
+  .counter{font-size:13px;opacity:.5;margin-top:10px}
+  .sign{margin-top:14px;font-size:15px;opacity:.85;font-style:italic}
+  .love>:nth-child(2){--i:0}.love>:nth-child(3){--i:1}.love>:nth-child(4){--i:2}.love>:nth-child(5){--i:3}.love>:nth-child(6){--i:4}.love>:nth-child(7){--i:5}
+  @keyframes enter{from{opacity:0;filter:blur(4px);transform:translateY(12px)}}
+  @media (prefers-reduced-motion:no-preference){
+    #surprise:not(.hidden) .love>:not(.heart){animation:enter .3s ease-out backwards;animation-delay:calc(var(--i)*100ms + 250ms)}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .bg,.lock,.heart,.shake{animation:none}
+    .screen.hidden{transform:none}
+    .screen{transition-property:opacity,visibility}
+  }
+  .btn.alt{background:var(--glass);border:1px solid var(--border);box-shadow:none;margin-top:12px}
+  .pop{position:fixed;z-index:50;pointer-events:none;user-select:none;will-change:transform,opacity}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div id="hearts"></div>
+
+<section class="screen" id="login">
+  <div class="card" id="loginCard">
+    <div class="lock">🔒</div>
+    <h1>Фатима, тут кое-что для тебя</h1>
+    <p class="sub">Введи пароль, чтобы открыть сюрприз</p>
+    <input id="pass" type="password" inputmode="numeric" maxlength="4" placeholder="••••" autocomplete="off">
+    <button class="btn" id="enter">Войти</button>
+    <div class="error" id="err">Ой, не то 🥺 Попробуй ещё раз</div>
+  </div>
+</section>
+
+<section class="screen hidden" id="surprise">
+  <div class="card love">
+    <div class="heart" id="bigHeart">❤️</div>
+    <h1>Фатима, я тебя люблю</h1>
+    <p id="phrase"></p>
+    <button class="btn" id="next">Ещё одно признание 💌</button>
+    <button class="btn alt" id="boom">Нажми на меня 🎉</button>
+    <div class="counter" id="counter"></div>
+    <div class="sign">С любовью, твой Ильяс 💕</div>
+  </div>
+</section>
+
+<script>
+  const PASSWORD = "2731";
+  const phrases = [
+    "Фатима, твоё имя — моя любимая музыка. Могу повторять его бесконечно.",
+    "Я люблю, как ты смеёшься. Хочу, чтобы этот смех звучал в моей жизни всегда.",
+    "Ты — мой самый тёплый вечер и мой самый светлый день.",
+    "Рядом с тобой я чувствую себя дома, где бы мы ни были.",
+    "Спасибо, что ты терпишь меня и всё равно любишь. Я ценю это больше, чем могу сказать.",
+    "Фатима, ты красивая не только снаружи, но и всем своим сердцем.",
+    "Я бы выбирал тебя в каждой жизни и в каждом мире.",
+    "Твои глаза — моё любимое место, где я теряюсь.",
+    "Ты — моя мечта, которая оказалась реальной.",
+    "Когда ты рядом, все тревоги просто растворяются.",
+    "Я благодарен за тот день, когда мы встретились.",
+    "Ты делаешь обычные дни особенными.",
+    "Мне нравится в тебе всё: от характера до мелочей, которые ты сама не замечаешь.",
+    "Фатима, ты мой покой и моя радость одновременно.",
+    "Моё сердце давно принадлежит тебе, и обратно я его не прошу.",
+    "Ты — причина, по которой я верю в чудеса.",
+    "С тобой мне хочется быть лучше каждый день.",
+    "Я скучаю по тебе даже тогда, когда ты в соседней комнате.",
+    "Твоя доброта — самое большое богатство, которое я знаю.",
+    "Ты — моя любимая мысль перед сном и первая — с утра.",
+    "Фатима, ты самый дорогой человек для меня на свете.",
+    "Мне повезло больше всех, потому что у меня есть ты.",
+    "Ты как рассвет: появляешься, и всё вокруг становится светлее.",
+    "Я люблю наши разговоры, наши шутки и наше молчание.",
+    "С тобой хочется строить будущее, где мы всегда вместе.",
+    "Ты умеешь одним взглядом сказать больше, чем тысячей слов.",
+    "Я хочу быть рядом с тобой и в радости, и в трудный день.",
+    "Фатима, спасибо за каждую минуту, подаренную мне.",
+    "Ты сильнее, чем думаешь, и прекраснее, чем можешь представить.",
+    "Моё любимое время суток — то, которое я провожу с тобой.",
+    "Ты не просто моя любимая, ты ещё и мой лучший друг.",
+    "Люблю, как ты морщишь носик, когда смеёшься.",
+    "Ты — мой маленький космос, в котором я хочу жить.",
+    "Если у счастья есть имя, то оно — Фатима.",
+    "Я никогда не устану говорить тебе, как сильно тебя люблю.",
+    "Ты делаешь мой мир мягче, добрее и ярче.",
+    "Рядом с тобой я могу быть собой, и это настоящая роскошь.",
+    "Фатима, ты самая нежная и самая сильная девушка из всех, кого я знаю.",
+    "Твоё «доброе утро» — лучшее начало любого дня.",
+    "Я бы собрал для тебя все звёзды, но ты и сама сияешь ярче.",
+    "Ты — моя тихая гавань в шумном мире.",
+    "Люблю тебя сегодня, завтра и каждый следующий день.",
+    "С тобой даже обычная прогулка превращается в приключение.",
+    "Ты — моё самое светлое «навсегда».",
+    "Фатима, твоя улыбка лечит всё, что болит внутри меня.",
+    "Я горжусь тем, какая ты. Ты вдохновляешь меня.",
+    "Ты — самый дорогой подарок, который я берегу всем сердцем.",
+    "Мне нравится просто смотреть, как ты что-то делаешь. Даже это — счастье.",
+    "Ты — уют, который можно обнять.",
+    "Фатима, я хочу, чтобы ты всегда чувствовала себя любимой.",
+    "Ты делаешь меня самым счастливым человеком на свете.",
+    "Каждая встреча с тобой — как первое свидание, от которого замирает сердце.",
+    "Я люблю тебя не за что-то, а просто потому, что ты — это ты.",
+    "Ты — самая лучшая неожиданность в моей жизни.",
+    "Пусть каждый твой день будет наполнен теплом, как ты наполняешь им мои.",
+    "Фатима, ты моя вселенная, и я счастлив жить в ней.",
+    "Моё сердце бьётся чуть быстрее, когда я слышу твой голос.",
+    "Ты — стихотворение, которое я не устану перечитывать.",
+    "Мне хочется беречь тебя от всех бед и радовать каждый день.",
+    "С тобой я понял, что такое настоящая любовь.",
+    "Ты красива, когда смеёшься, когда задумалась и даже когда сердишься.",
+    "Фатима, ты мой светлый лучик в любую погоду.",
+    "Я мечтаю о том дне, когда мы будем вместе просыпаться каждое утро.",
+    "Ты научила меня видеть красоту в мелочах.",
+    "Что бы ни случилось, знай: я всегда на твоей стороне.",
+    "Ты — моя самая тёплая причина возвращаться домой.",
+    "Фатима, я люблю тебя больше, чем способен выразить словами.",
+    "Твои объятия — лучшее место на земле.",
+    "Ты наполняешь мою жизнь смыслом, красками и нежностью.",
+    "Мне не нужен целый мир, когда рядом ты.",
+    "Спасибо, что ты рядом. Это для меня самый ценный подарок.",
+    "Я улыбаюсь, как только вспоминаю о тебе.",
+    "Фатима, ты — моё лучшее решение и моя самая большая радость.",
+    "Ты — моя радость, моя нежность и моё вдохновение.",
+    "С тобой я чувствую, что всё будет хорошо.",
+    "Люблю тебя так, что сердце не помещается в груди.",
+    "Ты — моя вечная весна, даже когда за окном холодно.",
+    "Каждый раз, глядя на тебя, я влюбляюсь заново.",
+    "Фатима, обещаю заботиться о тебе, уважать и любить тебя всегда.",
+    "Ты — моя самая лучшая история, и я хочу писать её с тобой дальше.",
+    "Мне так спокойно и счастливо рядом с тобой, как нигде в мире.",
+    "Ты — мой свет, моя опора и моя любовь.",
+    "Если бы любовь можно было измерить, моя к тебе не поместилась бы ни в одну меру.",
+    "Фатима, ты — нежная мечта, ставшая явью.",
+    "Хочу, чтобы ты знала: ты достойна всего самого лучшего.",
+    "Я счастлив просто от того, что ты существуешь.",
+    "С тобой любое место становится самым любимым.",
+    "Ты — моё сердце, которое ходит отдельно от меня.",
+    "Фатима, ты — моя любовь, моя гордость и моя нежность.",
+    "Спасибо тебе за тепло, заботу и твою душу.",
+    "Я люблю тебя, Фатима. Сегодня, завтра и всегда.",
+    "И это только часть. Остальные слова я скажу тебе лично.",
+    "Ты — самое лучшее, что случилось со мной. Рядом с тобой мир становится теплее и ярче.",
+    "Мне не нужны слова, чтобы это сказать, но всё равно скажу: ты моя любимая.",
+    "Каждый день с тобой — как маленький праздник. Спасибо, что ты есть.",
+    "Твоя улыбка — моя любимая причина улыбаться в ответ.",
+    "Ты делаешь меня лучше, просто будучи собой. Я безумно тебя люблю.",
+    "Если бы мне предложили выбрать снова, я выбрал бы тебя. Всегда тебя.",
+    "С тобой даже тишина — уютная. Ты мой дом, моя радость и моё всё. ❤️"
+  ];
+  const heartsBox = document.getElementById("hearts");
+  const emojis = ["❤️","💖","💗","💕","💘","🌸","✨"];
+  let heartsTimer = null;
+
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function spawnHeart(burst=false){
+    if(reduceMotion) return;
+    const el = document.createElement("span");
+    el.className = "fall";
+    el.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+    const dur = burst ? 3 + Math.random()*2 : 6 + Math.random()*6;
+    el.style.left = Math.random()*100 + "vw";
+    el.style.fontSize = (14 + Math.random()*26) + "px";
+    el.style.opacity = .4 + Math.random()*.6;
+    el.style.animationDuration = dur + "s";
+    el.style.setProperty("--dx", (Math.random()*160-80) + "px");
+    el.style.setProperty("--rot", (Math.random()*540-270) + "deg");
+    heartsBox.appendChild(el);
+    setTimeout(()=>el.remove(), dur*1000+200);
+  }
+  function startHearts(){ if(!heartsTimer) heartsTimer = setInterval(spawnHeart, 700); }
+
+  const pass = document.getElementById("pass");
+  const err = document.getElementById("err");
+  const card = document.getElementById("loginCard");
+
+  function tryLogin(){
+    if(pass.value === PASSWORD){
+      err.classList.remove("show");
+      document.getElementById("login").classList.add("hidden");
+      document.getElementById("surprise").classList.remove("hidden");
+      startHearts();
+      for(let i=0;i<10;i++) setTimeout(()=>spawnHeart(true), i*90);
+      showPhrase(0, true);
+    } else {
+      card.classList.remove("shake");
+      void card.offsetWidth;
+      card.classList.add("shake");
+      err.classList.add("show");
+      pass.value = "";
+      pass.focus();
+    }
+  }
+  document.getElementById("enter").addEventListener("click", tryLogin);
+  pass.addEventListener("keydown", e => { if(e.key==="Enter") tryLogin(); });
+  pass.addEventListener("input", () => err.classList.remove("show"));
+
+  // Генератор бесконечных признаний
+  const pick = a => a[Math.floor(Math.random()*a.length)];
+  const G = {
+    addr:["Фатима","Моя любимая","Солнышко","Моя родная","Любимая","Моя радость"],
+    meta:["моё солнце в пасмурный день","моя тихая гавань","моя любимая сказка","мой самый тёплый свет","моя самая красивая мечта","мой дом, где бы я ни был","моя главная причина улыбаться","моя самая нежная радость","моё самое родное сердце","мой любимый уют","моя звезда, которая никогда не гаснет","моя весна в любую погоду","моё лучшее «сегодня» и самое светлое «завтра»","моя самая большая радость","моя нежность и моё вдохновение","моё всё"],
+    love:["твою улыбку","твой смех","твои глаза","твою доброту","твой голос","твои объятия","твоё сердце","твою нежность","твоё упрямство","твои маленькие странности","то, как ты смотришь на меня","то, как ты заботишься о других","то, как ты радуешься мелочам","то, как ты морщишь носик, когда смеёшься"],
+    tail:["и с каждым днём всё сильнее","и никогда не устану это повторять","и это навсегда","и ничего не могу с этим поделать","и каждый раз не могу налюбоваться","и это моя любимая часть дня"],
+    withU:["любой день становится праздником","даже тишина звучит как музыка","я чувствую себя дома","мир становится ярче","все тревоги растворяются","время летит незаметно","мне хочется становиться лучше","любая мелочь превращается в счастье","даже обычный вечер — самый лучший","я улыбаюсь без причины"],
+    when:["Утром","Вечером","Днём","Ночью","Каждую минуту","Даже во сне"],
+    thanks:["рядом","есть в моей жизни","такая добрая и тёплая","умеешь делать меня счастливым","терпишь меня и всё равно любишь","смеёшься так искренне","веришь в меня"],
+    want:["просыпаться рядом с тобой каждое утро","держать тебя за руку всю жизнь","слушать твой смех каждый день","беречь тебя от любых тревог","встречать с тобой каждый закат","дарить тебе улыбки каждый день","быть рядом и в радости, и в трудный день"],
+    choose:["выбрал бы тебя","выбрал бы тебя ещё раз","снова нашёл бы тебя","не раздумывая выбрал бы тебя"],
+    adj:["добрая","нежная","красивая","тёплая","искренняя","заботливая","родная","удивительная"],
+    beat:["бьётся быстрее","замирает","улыбается","становится тёплым"],
+    beatWhen:["я слышу твой голос","ты улыбаешься","ты рядом","я вижу твоё сообщение","я думаю о тебе"],
+    fall:["я вижу тебя","ты смеёшься","ты рядом","я слышу твоё имя"],
+    feel:["я скучаю","я думаю о тебе","я благодарен за тебя","я счастлив рядом с тобой","я горжусь тобой"],
+    amount:["каждый день","каждую минуту","сильнее, чем вчера","больше, чем могу сказать"],
+    close:["","","",""," Люблю тебя."," Ты моя радость."," Я так тебе благодарен."," И так будет всегда."," Просто знай это."]
+  };
+  const templates = [
+    () => pick(G.addr)+", ты — "+pick(G.meta)+".",
+    () => "Я люблю "+pick(G.love)+", "+pick(G.tail)+".",
+    () => "С тобой "+pick(G.withU)+".",
+    () => pick(G.when)+" я думаю о тебе"+pick(["."," и улыбаюсь."," и скучаю."," и благодарю за тебя."]),
+    () => "Спасибо, что ты "+pick(G.thanks)+".",
+    () => "Хочу "+pick(G.want)+".",
+    () => "Если бы мне дали выбрать снова, я "+pick(G.choose)+".",
+    () => pick(G.addr)+", ты самая "+pick(G.adj)+" на свете.",
+    () => "Моё сердце "+pick(G.beat)+", когда "+pick(G.beatWhen)+".",
+    () => "Каждый раз, когда "+pick(G.fall)+", я влюбляюсь заново.",
+    () => pick(G.addr)+", "+pick(G.feel)+" "+pick(G.amount)+"."
+  ];
+  const genPhrase = () => pick(templates)() + pick(G.close);
+  const recent = [];
+  let shown = 0;
+  function nextPhrase(){
+    let s, tries = 0;
+    do{
+      s = Math.random() < 0.3 ? pick(phrases) : genPhrase();
+      tries++;
+    } while(recent.includes(s) && tries < 40);
+    recent.push(s);
+    if(recent.length > 80) recent.shift();
+    return s;
+  }
+
+  const phraseEl = document.getElementById("phrase");
+  const counter = document.getElementById("counter");
+  let idx = 0;
+  function showPhrase(i, first=false){
+    const apply = () => {
+      phraseEl.textContent = nextPhrase();
+      shown++; counter.textContent = "Признание № " + shown + " · их бесконечно ∞";
+      phraseEl.classList.remove("out");
+    };
+    if(first){ apply(); return; }
+    phraseEl.classList.add("out");
+    setTimeout(apply, 350);
+  }
+  document.getElementById("next").addEventListener("click", () => {
+    idx++;
+    showPhrase(idx);
+    for(let i=0;i<4;i++) setTimeout(()=>spawnHeart(true), i*80);
+  });
+  const boomLabels = ["Ещё раз! 💖","Люблю тебя! 😘","Ты моя радость ✨","Мур-мур 🥰","Ещё-ещё! 💘"];
+  let boomCount = 0;
+  function burst(x, y){
+    if(reduceMotion) return;
+    const parts = ["❤️","💖","💗","💕","💘","✨","🌸"];
+    for(let i=0;i<12;i++){
+      const el = document.createElement("span");
+      el.className = "pop";
+      el.textContent = parts[Math.floor(Math.random()*parts.length)];
+      el.style.left = x + "px";
+      el.style.top = y + "px";
+      el.style.fontSize = (16 + Math.random()*24) + "px";
+      document.body.appendChild(el);
+      const ang = Math.random()*Math.PI*2;
+      const dist = 90 + Math.random()*170;
+      const dx = Math.cos(ang)*dist;
+      const dy = Math.sin(ang)*dist - 60;
+      const rot = (Math.random()*360-180);
+      const anim = el.animate([
+        {transform:"translate(-50%,-50%) scale(.2) rotate(0deg)",opacity:1},
+        {transform:"translate(calc(-50% + " + dx + "px), calc(-50% + " + dy + "px)) scale(1.1) rotate(" + rot + "deg)",opacity:1,offset:.7},
+        {transform:"translate(calc(-50% + " + dx + "px), calc(-50% + " + (dy+80) + "px)) scale(.9) rotate(" + rot + "deg)",opacity:0}
+      ],{duration:1100 + Math.random()*700,easing:"cubic-bezier(.15,.7,.3,1)",fill:"forwards"});
+      anim.onfinish = () => el.remove();
+    }
+  }
+  document.getElementById("boom").addEventListener("click", function(e){
+    const r = this.getBoundingClientRect();
+    const x = (e.clientX || r.left + r.width/2);
+    const y = (e.clientY || r.top + r.height/2);
+    burst(x, y);
+    for(let i=0;i<8;i++) setTimeout(()=>spawnHeart(true), i*80);
+    this.textContent = boomLabels[boomCount % boomLabels.length];
+    boomCount++;
+    try{ if(navigator.vibrate) navigator.vibrate(60); }catch(err){}
+  });
+  document.getElementById("bigHeart").addEventListener("click", () => {
+    for(let i=0;i<8;i++) setTimeout(()=>spawnHeart(true), i*70);
+  });
+</script>
+</body>
+</html>
